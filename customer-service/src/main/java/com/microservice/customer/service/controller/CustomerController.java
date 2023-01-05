@@ -4,6 +4,7 @@ import com.microservice.customer.service.dto.Customer;
 import com.microservice.customer.service.dto.CustomerDetails;
 import com.microservice.customer.service.entity.CustomerEntity;
 import com.microservice.customer.service.service.CustomerService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
+    @CircuitBreaker(name = "breaker", fallbackMethod = "customerFallback")
     @GetMapping("/{id}")
     public ResponseEntity<CustomerDetails> getCustomer(@PathVariable("id") Long customerId) {
         LOGGER.info("Incoming request on getCustomer for {}", customerId);
@@ -40,6 +42,7 @@ public class CustomerController {
         }
     }
 
+    @CircuitBreaker(name = "breaker", fallbackMethod = "customerFallback")
     @PostMapping("/save")
     public ResponseEntity<?> saveCustomer(@RequestBody Customer customer) {
         LOGGER.info("Incoming request on saveCustomer for {}", customer.toString());
@@ -50,6 +53,12 @@ public class CustomerController {
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    public ResponseEntity<?> customerFallback(Exception e) {
+        LOGGER.error("customerFallback");
+        LOGGER.error(e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
 }

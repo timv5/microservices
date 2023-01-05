@@ -8,12 +8,14 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
   instance:
-    hostname: API-GATEWAY-SERVICE
+    hostname: API-GATEWAY
 
 spring:
   application:
     name: API-GATEWAY
   cloud:
+    config:
+      enabled: false
     gateway:
       routes:
         - id: CUSTOMER-SERVICE
