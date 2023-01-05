@@ -1,0 +1,55 @@
+version: '3'
+
+networks:
+  microservice:
+    driver: bridge
+
+services:
+
+  service-registry:
+    build:
+      context: ../../service-registry
+      dockerfile: ../service-registry/.Dockerfile
+    container_name: service-registry
+    networks:
+      - microservice
+    ports:
+      - "8761:8761"
+
+  bookstore-service:
+    build:
+      context: ../../bookstore-service
+      dockerfile: ../bookstore-service/.Dockerfile
+    container_name: bookstore-service
+    networks:
+      - microservice
+    ports:
+      - "9001:9001"
+    depends_on:
+      - service-registry
+
+  customer-service:
+    build:
+      context: ../../customer-service
+      dockerfile: ../customer-service/.Dockerfile
+    container_name: customer-service
+    networks:
+      - microservice
+    ports:
+      - "9002:9002"
+    depends_on:
+      - service-registry
+
+  api-gateway:
+    build:
+      context: ../../api-gateway
+      dockerfile: ../api-gateway/.Dockerfile
+    container_name: api-gateway
+    networks:
+      - microservice
+    ports:
+      - "9191:9191"
+    depends_on:
+      - service-registry
+      - bookstore-service
+      - customer-service
